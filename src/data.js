@@ -4,7 +4,7 @@ export const header = {
   socials: [
     {
       label: "GitHub",
-      url: "https://github.com/mohanseetha",
+      url: "https://github.com/mohans44",
       icon: "Github",
     },
     {
@@ -66,13 +66,12 @@ export const education = [
 export const experience = [
   {
     title: "Research Intern",
-    organization:
-      "Godavari Institute of Engineering and Technology",
+    organization: "Godavari Institute of Engineering and Technology",
     duration: "Dec 2024 – Mar 2025",
     responsibilities: [
       "Engineered a land use prediction model achieving 91% accuracy using satellite imagery and Markov chains.",
       "Developed a plant disease detection system processing 30,000+ images with 94.6% accuracy.",
-      "Delivered actionable insights to the agricultural department, optimizing resource allocation."
+      "Delivered actionable insights to the agricultural department, optimizing resource allocation.",
     ],
   },
 ];
@@ -81,30 +80,30 @@ export const projects = [
   {
     name: "Movie Vault",
     desc: "Personalized movie journal with a recommendation engine. Handles 1M+ records with sub-second search latency.",
-    github: "https://github.com/mohanseetha/movie-vault",
+    github: "https://github.com/mohans44/movie-vault",
     live: "https://movie-vault-web.vercel.app/",
     tech: ["MERN Stack", "TailwindCSS", "Scikit-Learn"],
     featured: true,
     media: "/movie-vault-demo.gif",
-    mediaType: "image"
+    mediaType: "image",
   },
   {
     name: "Feed Focus",
     desc: "A high-scale news aggregator processing 10,000+ daily articles. Features real-time topic filtering and a highly optimized backend.",
-    github: "https://github.com/mohanseetha/feed-focus",
+    github: "https://github.com/mohans44/feed-focus",
     live: "https://feed-focus-news.onrender.com/",
     tech: ["React", "Spring Boot", "MongoDB", "Material UI"],
     media: "/feed-focus-demo.gif",
-    mediaType: "image"
+    mediaType: "image",
   },
   {
     name: "Job Finder",
     desc: "Full-featured job portal with application tracking and role-based dashboards. Secure and responsive.",
-    github: "https://github.com/mohanseetha/job-finder",
+    github: "https://github.com/mohans44/job-finder",
     live: "https://job-finder-web.web.app/",
     tech: ["React", "Firebase", "Chakra UI"],
     media: "/job-finder-demo.gif",
-    mediaType: "image"
+    mediaType: "image",
   },
   {
     name: "GIET UniPass",
@@ -113,16 +112,16 @@ export const projects = [
     live: "https://giet-unipass.vercel.app/",
     tech: ["React", "Flask", "MongoDB"],
     media: "/giet-unipass-demo.gif",
-    mediaType: "image"
+    mediaType: "image",
   },
   {
     name: "Pneumonia Prediction",
     desc: "Deep learning model for medical diagnosis with 99% recall. Deployed for real-time inference via Streamlit.",
-    github: "https://github.com/mohanseetha/pneumonia-prediction/",
+    github: "https://github.com/mohans44/pneumonia-prediction/",
     live: "https://pneumoniaprediction.streamlit.app/",
     tech: ["PyTorch", "ResNet", "Streamlit"],
     media: "/pneumonia-prediction-demo.gif",
-    mediaType: "image"
+    mediaType: "image",
   },
 ];
 
