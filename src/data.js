@@ -90,8 +90,8 @@ export const projects = [
   {
     name: "Feed Focus",
     desc: "A high-scale news aggregator processing 10,000+ daily articles. Features real-time topic filtering and a highly optimized backend.",
-    github: "https://github.com/mohans44/feed-focus",
-    live: "https://feed-focus-news.onrender.com/",
+    github: "https://github.com/mohans44/feedfocus",
+    live: "https://feedfocusnews.vercel.app/",
     tech: ["React", "Spring Boot", "MongoDB", "Material UI"],
     media: "/feed-focus-demo.gif",
     mediaType: "image",
