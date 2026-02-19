@@ -12,6 +12,24 @@ import './App.css';
 
 const MotionDiv = motion.div;
 const pages = ['home', 'work', 'blog'];
+const getPageIndex = (pageId) => pages.indexOf(pageId);
+const pageSwipeVariants = {
+  enter: ({ direction, width }) => ({
+    x: direction >= 0 ? width : -width,
+    opacity: 1,
+    filter: 'blur(0px)',
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+    filter: 'blur(0px)',
+  },
+  exit: ({ direction, width }) => ({
+    x: direction >= 0 ? -width : width,
+    opacity: 1,
+    filter: 'blur(0px)',
+  }),
+};
 
 function App() {
   const [showResume, setShowResume] = useState(false);
@@ -22,6 +40,10 @@ function App() {
     const hash = window.location.hash.replace('#', '');
     return pages.includes(hash) ? hash : 'home';
   });
+  const [pageDirection, setPageDirection] = useState(1);
+  const [pageWidth, setPageWidth] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth : 1280,
+  );
   const homeRef = useRef(null);
   const workRef = useRef(null);
   const blogRef = useRef(null);
@@ -36,17 +58,28 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const onResize = () => setPageWidth(window.innerWidth);
+    window.addEventListener('resize', onResize);
+    onResize();
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
+  useEffect(() => {
     if (isMobile) return undefined;
     const handleHashChange = () => {
       const hash = window.location.hash.replace('#', '');
       if (pages.includes(hash)) {
+        const nextIndex = getPageIndex(hash);
+        const currentIndex = getPageIndex(activePage);
+        setPageDirection(nextIndex >= currentIndex ? 1 : -1);
         setActivePage(hash);
       }
     };
 
     window.addEventListener('hashchange', handleHashChange);
     return () => window.removeEventListener('hashchange', handleHashChange);
-  }, [isMobile]);
+  }, [activePage, isMobile]);
 
   useEffect(() => {
     if (isMobile) {
@@ -63,6 +96,9 @@ function App() {
 
   const changePage = (pageId) => {
     if (!pages.includes(pageId)) return;
+    const nextIndex = getPageIndex(pageId);
+    const currentIndex = getPageIndex(activePage);
+    setPageDirection(nextIndex >= currentIndex ? 1 : -1);
     setActivePage(pageId);
   };
 
@@ -73,6 +109,8 @@ function App() {
     }
     changePage('work');
   };
+
+  const pageSwipeCustom = { direction: pageDirection, width: pageWidth };
 
   return (
     <div className={!isMobile && activePage === 'work' ? 'app-shell work-mode' : 'app-shell'}>
@@ -109,22 +147,24 @@ function App() {
               onOpenWork={openWork}
             />
             <AboutSection />
-            <WorkSection />
+            <WorkSection isActive />
             <JourneySection />
             <BlogSection />
             <ContactSection />
           </MotionDiv>
         ) : (
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="sync" initial={false}>
             {activePage === 'home' && (
               <MotionDiv
                 className="page-view page-layer home-page-view"
                 ref={homeRef}
                 key="home-page"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                custom={pageSwipeCustom}
+                variants={pageSwipeVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
               >
                 <HomeIntroSection
                   openResume={() => setShowResume(true)}
@@ -141,12 +181,14 @@ function App() {
                 className="page-view page-layer projects-page-view"
                 ref={workRef}
                 key="work-page"
-                initial={{ opacity: 0, y: 16 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                custom={pageSwipeCustom}
+                variants={pageSwipeVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
               >
-                <WorkSection />
+                <WorkSection isActive={activePage === 'work'} />
               </MotionDiv>
             )}
 
@@ -155,10 +197,12 @@ function App() {
                 className="page-view page-layer blog-page-view"
                 ref={blogRef}
                 key="blog-page"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                custom={pageSwipeCustom}
+                variants={pageSwipeVariants}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
               >
                 <BlogSection />
               </MotionDiv>

@@ -1938,7 +1938,7 @@
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   overflow: hidden;
-  background: #0a0a0a;
+  background: #000;
   position: relative;
   height: 100%;
   display: grid;
@@ -1953,9 +1953,18 @@
 .project-demo-wrap img {
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
   object-position: center;
   display: block;
+}
+
+.project-demo-wrap .project-carousel-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
 }
 
 .project-info-clean p {

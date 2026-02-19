@@ -16,6 +16,20 @@ const PANEL_REVEAL_TRANSITION = {
   duration: 0.3,
   ease: [0.22, 1, 0.36, 1],
 };
+const CAROUSEL_SWIPE_VARIANTS = {
+  enter: (direction) => ({
+    x: direction > 0 ? '34%' : '-34%',
+    opacity: 0.72,
+  }),
+  center: {
+    x: '0%',
+    opacity: 1,
+  },
+  exit: (direction) => ({
+    x: direction > 0 ? '-34%' : '34%',
+    opacity: 0.72,
+  }),
+};
 const STICKY_COLORS = ['#ffd86f', '#8be9c4', '#9ec8ff', '#ffb4d0', '#cbb7ff', '#ffa373'];
 const STICKY_ANGLES = [-6, 5, -4, 7, -5, 6];
 const STICKY_BASE_POSITIONS = [
@@ -44,42 +58,55 @@ const buildInitialStickies = () =>
     };
   });
 
-const WorkPanel = ({ item, idx }) => {
+const WorkPanel = ({ item, idx, isCarouselActive = true, disableAutoplay = false }) => {
   const [activeImage, setActiveImage] = useState(0);
+  const [slideDirection, setSlideDirection] = useState(1);
   const [isPaused, setIsPaused] = useState(false);
-  const [isTouchDevice, setIsTouchDevice] = useState(() =>
-    typeof window !== 'undefined' ? window.matchMedia('(hover: none), (pointer: coarse)').matches : false,
-  );
+  const [isInView, setIsInView] = useState(false);
   const slides = Array.isArray(item.screenshots) ? item.screenshots : [];
   const currentSlide = slides[activeImage] ?? slides[0] ?? null;
+  const cardRef = useRef(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return undefined;
-    const media = window.matchMedia('(hover: none), (pointer: coarse)');
-    const onChange = (event) => setIsTouchDevice(event.matches);
-    setIsTouchDevice(media.matches);
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
+    if (typeof window === 'undefined' || !cardRef.current) return undefined;
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInView(entry.isIntersecting && entry.intersectionRatio > 0.5),
+      { threshold: [0.35, 0.5, 0.7] },
+    );
+    observer.observe(cardRef.current);
+    return () => observer.disconnect();
   }, []);
 
   useEffect(() => {
-    if (slides.length <= 1 || isPaused || isTouchDevice) return undefined;
+    if (slides.length <= 1 || isPaused || disableAutoplay || !isCarouselActive || !isInView) return undefined;
     const timer = setInterval(() => {
+      setSlideDirection(1);
       setActiveImage((prev) => (prev + 1) % slides.length);
-    }, 5000);
+    }, 4200);
     return () => clearInterval(timer);
-  }, [slides.length, isPaused, isTouchDevice]);
+  }, [slides.length, isPaused, disableAutoplay, isCarouselActive, isInView]);
 
   const goPrev = () => {
+    setSlideDirection(-1);
     setActiveImage((prev) => (prev - 1 + slides.length) % slides.length);
   };
 
   const goNext = () => {
+    setSlideDirection(1);
     setActiveImage((prev) => (prev + 1) % slides.length);
+  };
+
+  const goToSlide = (nextIndex) => {
+    if (nextIndex === activeImage || slides.length <= 1) return;
+    const forwardSteps = (nextIndex - activeImage + slides.length) % slides.length;
+    const backwardSteps = (activeImage - nextIndex + slides.length) % slides.length;
+    setSlideDirection(forwardSteps <= backwardSteps ? 1 : -1);
+    setActiveImage(nextIndex);
   };
 
   return (
     <MotionArticle
+      ref={cardRef}
       className="project-full-panel"
       initial={PANEL_REVEAL_INITIAL}
       whileInView={PANEL_REVEAL_INVIEW}
@@ -100,17 +127,20 @@ const WorkPanel = ({ item, idx }) => {
           onBlurCapture={() => setIsPaused(false)}
         >
           {currentSlide && (
-            <AnimatePresence mode="wait">
+            <AnimatePresence mode="sync" initial={false} custom={slideDirection}>
               <motion.img
-                key={currentSlide}
+                key={`${item.name}-${activeImage}`}
                 src={currentSlide}
                 alt={`${item.name} screen ${activeImage + 1}`}
+                className="project-carousel-image"
                 loading="lazy"
                 decoding="async"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.32, ease: 'easeOut' }}
+                custom={slideDirection}
+                variants={CAROUSEL_SWIPE_VARIANTS}
+                initial="enter"
+                animate="center"
+                exit="exit"
+                transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
               />
             </AnimatePresence>
           )}
@@ -129,7 +159,7 @@ const WorkPanel = ({ item, idx }) => {
                     type="button"
                     key={`${item.name}-dot-${dotIdx}`}
                     className={dotIdx === activeImage ? 'carousel-dot active' : 'carousel-dot'}
-                    onClick={() => setActiveImage(dotIdx)}
+                    onClick={() => goToSlide(dotIdx)}
                     aria-label={`Go to screenshot ${dotIdx + 1}`}
                   />
                 ))}
@@ -280,7 +310,7 @@ const WorkOutroPanel = ({ revealGame }) => {
   );
 };
 
-const WorkSection = () => {
+const WorkSection = ({ isActive = true }) => {
   const [stickies, setStickies] = useState(() => buildInitialStickies());
   const [isDesktop, setIsDesktop] = useState(() =>
     typeof window !== 'undefined' ? window.matchMedia('(min-width: 1025px)').matches : true,
@@ -388,6 +418,8 @@ const WorkSection = () => {
     return () => scrollRoot.removeEventListener('scroll', unlockWhenDoneScrolling);
   }, [isDesktop]);
 
+  const carouselActive = isActive;
+
   return (
     <section id="work" className="projects-modern">
       <motion.div
@@ -425,7 +457,13 @@ const WorkSection = () => {
         </div>
       </motion.div>
       {work.map((item, idx) => (
-        <WorkPanel key={item.name} item={item} idx={idx} />
+        <WorkPanel
+          key={item.name}
+          item={item}
+          idx={idx}
+          isCarouselActive={carouselActive}
+          disableAutoplay={isMobile}
+        />
       ))}
       {!isMobile && <WorkOutroPanel revealGame={playgroundUnlocked} />}
     </section>
